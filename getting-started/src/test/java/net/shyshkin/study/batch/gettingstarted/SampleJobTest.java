@@ -1,15 +1,13 @@
 package net.shyshkin.study.batch.gettingstarted;
 
-import net.shyshkin.study.batch.gettingstarted.config.SampleJob;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
-import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ContextConfiguration(classes = {SampleJob.class})
+//@ContextConfiguration(classes = {SampleJob.class})
 class SampleJobTest extends AbstractJobTest {
 
     @Test
