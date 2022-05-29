@@ -17,5 +17,5 @@ spring:
   batch:
     jdbc:
       platform: mysql
-      initialize-schema: always
+      initialize-schema: embedded
 
