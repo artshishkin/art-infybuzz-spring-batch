@@ -40,4 +40,19 @@ class SampleJobTest extends AbstractJobTest {
         assertThat(actualJobExitStatus.getExitCode()).isEqualTo("COMPLETED");
 
     }
+
+    @Test
+    void secondStepTest() {
+
+        //when
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Second Step");
+        var actualStepExecutions = jobExecution.getStepExecutions();
+        ExitStatus actualJobExitStatus = jobExecution.getExitStatus();
+
+        //then
+        assertThat(actualStepExecutions)
+                .hasSize(1);
+        assertThat(actualJobExitStatus.getExitCode()).isEqualTo("COMPLETED");
+
+    }
 }
