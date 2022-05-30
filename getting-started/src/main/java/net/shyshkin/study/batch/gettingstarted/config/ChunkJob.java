@@ -2,14 +2,15 @@ package net.shyshkin.study.batch.gettingstarted.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.shyshkin.study.batch.gettingstarted.processor.FirstItemProcessor;
+import net.shyshkin.study.batch.gettingstarted.reader.FirstItemReader;
+import net.shyshkin.study.batch.gettingstarted.writer.FirstItemWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -23,25 +24,24 @@ public class ChunkJob {
 
     private final JobBuilderFactory jobs;
     private final StepBuilderFactory steps;
+    private final FirstItemReader reader;
+    private final FirstItemProcessor processor;
+    private final FirstItemWriter writer;
 
     @Bean
     Job secondJob() {
         return jobs.get("Second Job")
                 .incrementer(new RunIdIncrementer())
-                .start(firstStep())
+                .start(firstChunkStep())
                 .build();
     }
 
-    private Step firstStep() {
-        return steps.get("First Step")
-                .tasklet(firstTask())
+    private Step firstChunkStep() {
+        return steps.get("First Chunk Step")
+                .<Integer, Long>chunk(3)
+                .reader(reader)
+                .processor(processor)
+                .writer(writer)
                 .build();
-    }
-
-    private Tasklet firstTask() {
-        return (stepContribution, chunkContext) -> {
-            log.debug("{} is executing", chunkContext.getStepContext().getStepName());
-            return RepeatStatus.FINISHED;
-        };
     }
 }
