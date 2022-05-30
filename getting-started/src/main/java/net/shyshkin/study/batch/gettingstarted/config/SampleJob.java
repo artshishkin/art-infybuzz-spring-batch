@@ -3,6 +3,8 @@ package net.shyshkin.study.batch.gettingstarted.config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.shyshkin.study.batch.gettingstarted.listener.FirstJobListener;
+import net.shyshkin.study.batch.gettingstarted.listener.FirstStepListener;
+import net.shyshkin.study.batch.gettingstarted.model.DummyModel;
 import net.shyshkin.study.batch.gettingstarted.service.SecondTasklet;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -25,6 +27,7 @@ public class SampleJob {
     private final StepBuilderFactory steps;
     private final SecondTasklet secondTasklet;
     private final FirstJobListener firstJobListener;
+    private final FirstStepListener firstStepListener;
 
     @Bean
     Job firstJob() {
@@ -38,13 +41,16 @@ public class SampleJob {
 
     private Step firstStep() {
         return steps.get("First Step")
+                .listener(firstStepListener)
                 .tasklet(firstTask())
                 .build();
     }
 
     private Tasklet firstTask() {
         return (stepContribution, chunkContext) -> {
-            log.debug("First Task is executing");
+            log.debug("{} is executing", chunkContext.getStepContext().getStepName());
+            DummyModel kate = (DummyModel) chunkContext.getStepContext().getStepExecutionContext().get("kate");
+            log.debug("Model from Step Execution Context: {}", kate);
             return RepeatStatus.FINISHED;
         };
     }
