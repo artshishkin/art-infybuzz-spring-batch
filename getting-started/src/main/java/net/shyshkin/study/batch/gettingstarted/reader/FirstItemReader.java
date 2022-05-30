@@ -7,8 +7,7 @@ import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.stereotype.Component;
 
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -16,13 +15,20 @@ import java.util.stream.IntStream;
 @Component
 public class FirstItemReader implements ItemReader<Integer> {
 
-    private final Deque<Integer> fifo = IntStream.rangeClosed(1, 10)
+    private final List<Integer> data = IntStream.rangeClosed(1, 10)
             .boxed()
-            .collect(Collectors.toCollection(LinkedList::new));
+            .collect(Collectors.toList());
+
+    private int currentIndex = -1;
 
     @Override
     public Integer read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
-        Integer value = fifo.poll();
+        currentIndex++;
+        if (currentIndex >= data.size()) {
+            currentIndex = -1;
+            return null;
+        }
+        Integer value = data.get(currentIndex);
         log.debug("Inside item reader: {}", value);
         return value;
     }
