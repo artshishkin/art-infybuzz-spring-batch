@@ -1,0 +1,11 @@
+###
+#Start First Job
+GET http://localhost:8080/api/job/start/First Job
+
+###
+#Start Second Job
+GET http://localhost:8080/api/job/start/Second Job
+
+###
+#Start Absent Job
+GET http://localhost:8080/api/job/start/Fake Job
