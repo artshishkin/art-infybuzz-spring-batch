@@ -9,13 +9,18 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/job")
@@ -23,15 +28,23 @@ import java.util.Map;
 public class JobController {
 
     private final JobLauncher jobLauncher;
-    private final Job firstJob;
-    private final Job secondJob;
+    private final List<Job> jobs;
+
+    private Map<String, Job> jobMap;
+
+    @PostConstruct
+    void init() {
+        jobMap = jobs.stream().collect(Collectors.toMap(Job::getName, Function.identity()));
+    }
 
     @GetMapping("/start/{jobName}")
-    public String startJob(@PathVariable String jobName) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+    public ResponseEntity<String> startJob(@PathVariable String jobName) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
 
-        Job job = "First Job".equals(jobName) ? firstJob : secondJob;
+        Job job = jobMap.get(jobName);
+        if (job == null)
+            return ResponseEntity.badRequest().body("Job with name `" + jobName + "` absent");
         jobLauncher.run(job, new JobParameters(Map.of("currentTime", new JobParameter(new Date()))));
-        return "Job Started...";
+        return ResponseEntity.ok("Job `" + jobName + "` Started...");
     }
 
 }
