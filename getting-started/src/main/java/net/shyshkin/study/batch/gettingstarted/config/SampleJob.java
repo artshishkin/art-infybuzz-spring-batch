@@ -2,6 +2,7 @@ package net.shyshkin.study.batch.gettingstarted.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.shyshkin.study.batch.gettingstarted.listener.FirstJobListener;
 import net.shyshkin.study.batch.gettingstarted.service.SecondTasklet;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -23,11 +24,13 @@ public class SampleJob {
     private final JobBuilderFactory jobs;
     private final StepBuilderFactory steps;
     private final SecondTasklet secondTasklet;
+    private final FirstJobListener firstJobListener;
 
     @Bean
     Job firstJob() {
         return jobs.get("First Job")
                 .incrementer(new RunIdIncrementer())
+                .listener(firstJobListener)
                 .start(firstStep())
                 .next(secondStep())
                 .build();

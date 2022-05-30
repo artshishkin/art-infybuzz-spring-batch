@@ -1,9 +1,16 @@
 package net.shyshkin.study.batch.gettingstarted;
 
+import net.shyshkin.study.batch.gettingstarted.model.DummyModel;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.item.ExecutionContext;
+
+import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,7 +28,16 @@ class SampleJobTest extends AbstractJobTest {
         //then
         assertThat(actualJobInstance.getJobName()).isEqualTo("First Job");
         assertThat(actualJobExitStatus.getExitCode()).isEqualTo("COMPLETED");
-
+        System.out.println(jobExecution.getExecutionContext());
+        assertThat(jobExecution.getExecutionContext())
+                .satisfies(executionContext -> assertThat(executionContext.get("jec")).isEqualTo("jec value"))
+                .satisfies(executionContext -> assertThat(executionContext.get("art"))
+                        .isInstanceOf(DummyModel.class)
+                        .hasNoNullFieldsOrProperties()
+                        .hasFieldOrPropertyWithValue("id", 123)
+                        .hasFieldOrPropertyWithValue("name", "Art")
+                        .hasFieldOrPropertyWithValue("price", new BigDecimal("99.99"))
+                );
     }
 
     @Test
@@ -42,8 +58,20 @@ class SampleJobTest extends AbstractJobTest {
     @Test
     void secondStepTest() {
 
+        //given
+        ExecutionContext jobExecutionContext = new ExecutionContext(
+                Map.of(
+                        "jec", "jec value",
+                        "art", DummyModel.builder()
+                                .id(123)
+                                .name("Art")
+                                .price(new BigDecimal("123.99"))
+                                .build()
+                )
+        );
+
         //when
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Second Step");
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Second Step", jobExecutionContext);
         var actualStepExecutions = jobExecution.getStepExecutions();
         ExitStatus actualJobExitStatus = jobExecution.getExitStatus();
 
@@ -51,6 +79,12 @@ class SampleJobTest extends AbstractJobTest {
         assertThat(actualStepExecutions)
                 .hasSize(1);
         assertThat(actualJobExitStatus.getExitCode()).isEqualTo("COMPLETED");
+        Optional<StepExecution> stepExecutionOptional = jobExecution.getStepExecutions()
+                .stream()
+                .filter(stepExecution -> "Second Step".equals(stepExecution.getStepName()))
+                .findAny();
+        assertThat(stepExecutionOptional)
+                .hasValueSatisfying(stepExecution -> assertThat(stepExecution.getExitStatus().getExitCode()).isEqualTo("COMPLETED"));
 
     }
 }
