@@ -2,10 +2,6 @@ package net.shyshkin.study.batch.gettingstarted.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.shyshkin.study.batch.gettingstarted.listener.FirstJobListener;
-import net.shyshkin.study.batch.gettingstarted.listener.FirstStepListener;
-import net.shyshkin.study.batch.gettingstarted.model.DummyModel;
-import net.shyshkin.study.batch.gettingstarted.service.SecondTasklet;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -22,28 +18,22 @@ import org.springframework.context.annotation.Profile;
 @EnableBatchProcessing
 @Configuration
 @RequiredArgsConstructor
-@Profile("section04")
-public class SampleJob {
+@Profile("section05")
+public class ChunkJob {
 
     private final JobBuilderFactory jobs;
     private final StepBuilderFactory steps;
-    private final SecondTasklet secondTasklet;
-    private final FirstJobListener firstJobListener;
-    private final FirstStepListener firstStepListener;
 
     @Bean
-    Job firstJob() {
-        return jobs.get("First Job")
+    Job secondJob() {
+        return jobs.get("Second Job")
                 .incrementer(new RunIdIncrementer())
-                .listener(firstJobListener)
                 .start(firstStep())
-                .next(secondStep())
                 .build();
     }
 
     private Step firstStep() {
         return steps.get("First Step")
-                .listener(firstStepListener)
                 .tasklet(firstTask())
                 .build();
     }
@@ -51,16 +41,7 @@ public class SampleJob {
     private Tasklet firstTask() {
         return (stepContribution, chunkContext) -> {
             log.debug("{} is executing", chunkContext.getStepContext().getStepName());
-            DummyModel kate = (DummyModel) chunkContext.getStepContext().getStepExecutionContext().get("kate");
-            log.debug("Model from Step Execution Context: {}", kate);
             return RepeatStatus.FINISHED;
         };
     }
-
-    private Step secondStep() {
-        return steps.get("Second Step")
-                .tasklet(secondTasklet)
-                .build();
-    }
-
 }
