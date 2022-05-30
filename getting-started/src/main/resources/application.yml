@@ -1,8 +1,10 @@
 logging:
   level:
     net.shyshkin: debug
-
-
+spring:
+  batch:
+    job:
+      enabled: false
 ---
 spring:
   config:
