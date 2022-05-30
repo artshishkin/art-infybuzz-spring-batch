@@ -50,5 +50,19 @@ class ChunkJobTest extends AbstractJobTest {
 
     }
 
+    @Test
+    void secondTaskletStepTest() {
+
+        //when
+        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Second Tasklet Step");
+        var actualStepExecutions = jobExecution.getStepExecutions();
+        ExitStatus actualJobExitStatus = jobExecution.getExitStatus();
+
+        //then
+        assertThat(actualStepExecutions)
+                .hasSize(1);
+        assertThat(actualJobExitStatus.getExitCode()).isEqualTo("COMPLETED");
+
+    }
 
 }

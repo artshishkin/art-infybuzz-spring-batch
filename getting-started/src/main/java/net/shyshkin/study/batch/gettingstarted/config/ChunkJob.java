@@ -11,6 +11,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -33,6 +34,7 @@ public class ChunkJob {
         return jobs.get("Second Job")
                 .incrementer(new RunIdIncrementer())
                 .start(firstChunkStep())
+                .next(secondStep())
                 .build();
     }
 
@@ -42,6 +44,15 @@ public class ChunkJob {
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
+                .build();
+    }
+
+    private Step secondStep() {
+        return steps.get("Second Tasklet Step")
+                .tasklet((stepContribution, chunkContext) -> {
+                    log.debug("Inside {}", chunkContext.getStepContext().getStepName());
+                    return RepeatStatus.FINISHED;
+                })
                 .build();
     }
 }
