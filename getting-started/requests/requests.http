@@ -1,6 +1,6 @@
 ###
 #Start First Job
-GET http://localhost:8080/api/job/start/First Job
+POST http://localhost:8080/api/job/start/First Job
 Content-Type: application/json
 
 [
@@ -16,8 +16,8 @@ Content-Type: application/json
 
 ###
 #Start Second Job
-GET http://localhost:8080/api/job/start/Second Job
+POST http://localhost:8080/api/job/start/Second Job
 
 ###
 #Start Absent Job
-GET http://localhost:8080/api/job/start/Fake Job
+POST http://localhost:8080/api/job/start/Fake Job
