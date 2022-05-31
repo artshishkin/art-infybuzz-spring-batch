@@ -15,7 +15,7 @@ public class JobController {
 
     private final JobService jobService;
 
-    @GetMapping("/start/{jobName}")
+    @PostMapping("/start/{jobName}")
     public ResponseEntity<String> startJob(@PathVariable String jobName,
                                            @RequestBody(required = false) List<JobParamsRequest> requestParameters) {
 

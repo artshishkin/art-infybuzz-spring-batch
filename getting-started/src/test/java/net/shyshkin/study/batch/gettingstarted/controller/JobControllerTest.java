@@ -30,7 +30,7 @@ class JobControllerTest {
     void startExistingJob(String jobName) {
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity("/api/job/start/{jobName}", String.class, jobName);
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity("/api/job/start/{jobName}", List.of(), String.class, jobName);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -43,7 +43,7 @@ class JobControllerTest {
 
         //given
         List<JobParamsRequest> jobParamsRequestList = dummyJobParamsRequest();
-        RequestEntity<List<JobParamsRequest>> requestEntity = RequestEntity.method(HttpMethod.GET, "/api/job/start/{jobName}", jobName).body(jobParamsRequestList);
+        RequestEntity<List<JobParamsRequest>> requestEntity = RequestEntity.method(HttpMethod.POST, "/api/job/start/{jobName}", jobName).body(jobParamsRequestList);
 
         //when
         ResponseEntity<String> responseEntity = restTemplate.exchange(requestEntity, String.class);
@@ -66,7 +66,7 @@ class JobControllerTest {
         String jobName = "Absent Job";
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity("/api/job/start/{jobName}", String.class, jobName);
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity("/api/job/start/{jobName}", List.of(), String.class, jobName);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
