@@ -1,6 +1,18 @@
 ###
 #Start First Job
 GET http://localhost:8080/api/job/start/First Job
+Content-Type: application/json
+
+[
+  {
+    "paramKey": "city",
+    "paramValue": "Kramatorsk"
+  },
+  {
+    "paramKey": "state",
+    "paramValue": "Ukraine"
+  }
+]
 
 ###
 #Start Second Job

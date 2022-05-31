@@ -2,6 +2,7 @@ package net.shyshkin.study.batch.gettingstarted.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.shyshkin.study.batch.gettingstarted.model.JobParamsRequest;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
@@ -11,10 +12,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -38,9 +36,13 @@ public class JobService {
     }
 
     @Async
-    public void startJob(Job job) {
+    public void startJob(Job job, List<JobParamsRequest> requestParameters) {
         try {
-            JobExecution jobExecution = jobLauncher.run(job, new JobParameters(Map.of("currentTime", new JobParameter(new Date()))));
+            Map<String, JobParameter> params = new HashMap<>();
+            requestParameters.forEach(requestParameter -> params.put(requestParameter.getParamKey(), new JobParameter(requestParameter.getParamValue())));
+            params.put("currentTime", new JobParameter(new Date()));
+            JobParameters jobParameters = new JobParameters(params);
+            JobExecution jobExecution = jobLauncher.run(job, jobParameters);
             log.debug("Job Execution Id: {}", jobExecution.getJobId());
         } catch (Exception e) {
             log.error("Error in Batch Job", e);

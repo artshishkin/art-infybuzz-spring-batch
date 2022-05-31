@@ -1,14 +1,20 @@
 package net.shyshkin.study.batch.gettingstarted.controller;
 
+import net.shyshkin.study.batch.gettingstarted.model.JobParamsRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,6 +35,29 @@ class JobControllerTest {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo("Job `" + jobName + "` Started...");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"First Job", "Second Job"})
+    void startExistingJob_withRequestParameters(String jobName) {
+
+        //given
+        List<JobParamsRequest> jobParamsRequestList = dummyJobParamsRequest();
+        RequestEntity<List<JobParamsRequest>> requestEntity = RequestEntity.method(HttpMethod.GET, "/api/job/start/{jobName}", jobName).body(jobParamsRequestList);
+
+        //when
+        ResponseEntity<String> responseEntity = restTemplate.exchange(requestEntity, String.class);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo("Job `" + jobName + "` Started...");
+    }
+
+    private List<JobParamsRequest> dummyJobParamsRequest() {
+        return List.of(
+                new JobParamsRequest("param1", UUID.randomUUID().toString()),
+                new JobParamsRequest("param2", UUID.randomUUID().toString())
+        );
     }
 
     @Test
