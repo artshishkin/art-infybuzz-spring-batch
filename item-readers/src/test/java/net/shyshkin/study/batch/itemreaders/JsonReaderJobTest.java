@@ -72,7 +72,7 @@ class JsonReaderJobTest extends AbstractJobTest {
                         () -> assertThat(studentCsv).hasNoNullFieldsOrProperties(),
                         () -> assertThat(studentCsv.getId()).isGreaterThan(0),
                         () -> assertThat(studentCsv.getFirstName()).isNotEmpty(),
-                        () -> assertThat(studentCsv.getLastName()).isNotEmpty(),
+//                        () -> assertThat(studentCsv.getLastName()).isNotEmpty(),
                         () -> assertThat(studentCsv.getEmail()).isNotEmpty()
                 );
             }
