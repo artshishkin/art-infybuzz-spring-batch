@@ -49,7 +49,7 @@ class JobControllerTest {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo("Job `" + jobName + "` Started...");
-        awaitJobComplete(jobName);
+        awaitJobComplete(jobName, ExitStatus.COMPLETED);
     }
 
     @ParameterizedTest
@@ -66,7 +66,7 @@ class JobControllerTest {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo("Job `" + jobName + "` Started...");
-        awaitJobComplete(jobName);
+        awaitJobComplete(jobName, ExitStatus.COMPLETED);
     }
 
     private List<JobParamsRequest> dummyJobParamsRequest() {
@@ -89,7 +89,22 @@ class JobControllerTest {
         assertThat(responseEntity.getBody()).isEqualTo("Job with name `" + jobName + "` absent");
     }
 
-    private void awaitJobComplete(String jobName) {
+    @Test
+    void startExistingJob_withProcessorPause() {
+
+        //given
+        String jobName = "Second Job";
+
+        //when
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity("/api/job/start/{jobName}", List.of(new JobParamsRequest("processorPause","100")), String.class, jobName);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo("Job `" + jobName + "` Started...");
+        awaitJobComplete(jobName, ExitStatus.COMPLETED);
+    }
+
+    private void awaitJobComplete(String jobName, ExitStatus expectedExitStatus) {
         await()
                 .pollInterval(100, TimeUnit.MILLISECONDS)
                 .timeout(5, TimeUnit.SECONDS)
@@ -102,7 +117,7 @@ class JobControllerTest {
                         },
                         allOf(
                                 notNullValue(),
-                                hasProperty("exitStatus", equalTo(ExitStatus.COMPLETED))
+                                hasProperty("exitStatus", equalTo(expectedExitStatus))
                         )
                 );
     }
