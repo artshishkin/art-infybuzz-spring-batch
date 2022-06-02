@@ -5,7 +5,7 @@ import net.shyshkin.study.batch.gettingstarted.model.JobParamsRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.explore.JobExplorer;
@@ -38,6 +38,7 @@ class JobControllerTest {
 
     @Autowired
     JobExplorer jobExplorer;
+    private JobExecution lastJobExecution;
 
     @ParameterizedTest
     @ValueSource(strings = {"First Job", "Second Job"})
@@ -49,7 +50,7 @@ class JobControllerTest {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo("Job `" + jobName + "` Started...");
-        awaitJobComplete(jobName, ExitStatus.COMPLETED);
+        awaitJobStatus(jobName, BatchStatus.COMPLETED);
     }
 
     @ParameterizedTest
@@ -66,7 +67,7 @@ class JobControllerTest {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo("Job `" + jobName + "` Started...");
-        awaitJobComplete(jobName, ExitStatus.COMPLETED);
+        awaitJobStatus(jobName, BatchStatus.COMPLETED);
     }
 
     private List<JobParamsRequest> dummyJobParamsRequest() {
@@ -96,28 +97,56 @@ class JobControllerTest {
         String jobName = "Second Job";
 
         //when
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity("/api/job/start/{jobName}", List.of(new JobParamsRequest("processorPause","100")), String.class, jobName);
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity("/api/job/start/{jobName}", List.of(new JobParamsRequest("processorPause", "100")), String.class, jobName);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo("Job `" + jobName + "` Started...");
-        awaitJobComplete(jobName, ExitStatus.COMPLETED);
+        awaitJobStatus(jobName, BatchStatus.COMPLETED);
     }
 
-    private void awaitJobComplete(String jobName, ExitStatus expectedExitStatus) {
+    @Test
+    void stopExistingJob() {
+
+        // Start Job
+        //given
+        String jobName = "Second Job";
+
+        //when
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity("/api/job/start/{jobName}", List.of(new JobParamsRequest("processorPause", "100")), String.class, jobName);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo("Job `" + jobName + "` Started...");
+        awaitJobStatus(jobName, BatchStatus.STARTED);
+
+        // Stop Job
+        //given
+        Long jobExecutionId = lastJobExecution.getId();
+
+        //when
+        responseEntity = restTemplate.getForEntity("/api/job/stop/{jobExecutionId}", String.class, jobExecutionId);
+
+        //then
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo("Job stopped...");
+        awaitJobStatus(jobName, BatchStatus.STOPPED);
+    }
+
+    private void awaitJobStatus(String jobName, BatchStatus expectedStatus) {
         await()
                 .pollInterval(100, TimeUnit.MILLISECONDS)
                 .timeout(5, TimeUnit.SECONDS)
                 .until(
                         (Callable<JobExecution>) () -> {
                             JobInstance lastJobInstance = jobExplorer.getLastJobInstance(jobName);
-                            JobExecution lastJobExecution = jobExplorer.getLastJobExecution(lastJobInstance);
+                            lastJobExecution = jobExplorer.getLastJobExecution(lastJobInstance);
                             log.debug("Get Last Job Execution: {}", lastJobExecution);
                             return lastJobExecution;
                         },
                         allOf(
                                 notNullValue(),
-                                hasProperty("exitStatus", equalTo(expectedExitStatus))
+                                hasProperty("status", equalTo(expectedStatus))
                         )
                 );
     }
