@@ -26,7 +26,7 @@ class JsonReaderJobTest extends AbstractJobTest {
     }
 
     @Test
-    void jsonReaderJobText() throws Exception {
+    void jsonReaderJobTest() throws Exception {
 
         //when
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(defaultJobParameters());
@@ -90,7 +90,8 @@ class JsonReaderJobTest extends AbstractJobTest {
     class ReadPartItemsTests {
 
         JobParameters jobParameters = new JobParametersBuilder(defaultJobParameters())
-                .addString("maxItemCount", "5")
+                .addString("maxItemCount", "7")
+                .addLong("skipItems", 2L)
                 .toJobParameters();
 
         @Test
@@ -125,8 +126,8 @@ class JsonReaderJobTest extends AbstractJobTest {
                     StudentJson studentCsv = studentCsvRead;
                     assertAll(
                             () -> assertThat(studentCsv).hasNoNullFieldsOrProperties(),
-                            () -> assertThat(studentCsv.getId()).isGreaterThan(0),
-                            () -> assertThat(studentCsv.getId()).isLessThanOrEqualTo(5),
+                            () -> assertThat(studentCsv.getId()).isGreaterThan(2),
+                            () -> assertThat(studentCsv.getId()).isLessThanOrEqualTo(7),
                             () -> assertThat(studentCsv.getFirstName()).isNotEmpty(),
 //                        () -> assertThat(studentCsv.getLastName()).isNotEmpty(),
                             () -> assertThat(studentCsv.getEmail()).isNotEmpty()
