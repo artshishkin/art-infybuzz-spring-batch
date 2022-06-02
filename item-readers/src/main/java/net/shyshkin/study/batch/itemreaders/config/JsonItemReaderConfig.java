@@ -40,17 +40,21 @@ public class JsonItemReaderConfig {
     private Step chunkStep() {
         return steps.get("Just Reading Step")
                 .<StudentJson, StudentJson>chunk(3)
-                .reader(jsonItemReader(null))
+                .reader(jsonItemReader(null, -1))
                 .writer(list -> list.forEach(item -> log.debug("{}", item)))
                 .build();
     }
 
     @Bean
     @StepScope
-    JsonItemReader<StudentJson> jsonItemReader(@Value("#{jobParameters['inputFile']}") FileSystemResource resource) {
+    JsonItemReader<StudentJson> jsonItemReader(
+            @Value("#{jobParameters['inputFile']}") FileSystemResource resource,
+            @Value("#{jobParameters['maxItemCount'] ?: 0x7fffffff}") int maxItemCount
+    ) {
         return new JsonItemReaderBuilder<StudentJson>()
                 .name("jsonItemReader")
                 .resource(resource)
+                .maxItemCount(maxItemCount)
                 .jsonObjectReader(new JacksonJsonObjectReader<>(StudentJson.class))
                 .build();
     }

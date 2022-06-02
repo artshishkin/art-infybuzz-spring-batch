@@ -1,6 +1,7 @@
 package net.shyshkin.study.batch.itemreaders;
 
 import net.shyshkin.study.batch.itemreaders.model.StudentJson;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
 import org.springframework.batch.item.json.JsonItemReader;
@@ -38,46 +39,104 @@ class JsonReaderJobTest extends AbstractJobTest {
 
     }
 
-    @Test
-    void jsonReaderStepTest() {
+    @Nested
+    class ReadAllItemsTests {
+        @Test
+        void jsonReaderStepTest() {
 
-        //when
-        JobExecution jobExecution = jobLauncherTestUtils.launchStep("Just Reading Step", defaultJobParameters());
-        var actualStepExecutions = jobExecution.getStepExecutions();
-        ExitStatus actualJobExitStatus = jobExecution.getExitStatus();
+            //when
+            JobExecution jobExecution = jobLauncherTestUtils.launchStep("Just Reading Step", defaultJobParameters());
+            var actualStepExecutions = jobExecution.getStepExecutions();
+            ExitStatus actualJobExitStatus = jobExecution.getExitStatus();
 
-        //then
-        assertThat(actualStepExecutions)
-                .hasSize(1)
-                .allSatisfy(execution -> assertThat(execution.getWriteCount()).isEqualTo(10));
-        assertThat(actualJobExitStatus.getExitCode()).isEqualTo("COMPLETED");
+            //then
+            assertThat(actualStepExecutions)
+                    .hasSize(1)
+                    .allSatisfy(execution -> assertThat(execution.getWriteCount()).isEqualTo(10));
+            assertThat(actualJobExitStatus.getExitCode()).isEqualTo("COMPLETED");
 
-    }
+        }
 
-    @Test
-    void jsonReaderStepScopeTest() throws Exception {
-        //given
-        StepExecution stepExecution = MetaDataInstanceFactory
-                .createStepExecution(defaultJobParameters());
+        @Test
+        void jsonReaderStepScopeTest() throws Exception {
+            //given
+            StepExecution stepExecution = MetaDataInstanceFactory
+                    .createStepExecution(defaultJobParameters());
 
-        //when
-        StepScopeTestUtils.doInStepScope(stepExecution, () -> {
-            StudentJson studentCsvRead;
-            itemReader.open(stepExecution.getExecutionContext());
-            while ((studentCsvRead = itemReader.read()) != null) {
+            //when
+            StepScopeTestUtils.doInStepScope(stepExecution, () -> {
+                StudentJson studentCsvRead;
+                itemReader.open(stepExecution.getExecutionContext());
+                while ((studentCsvRead = itemReader.read()) != null) {
 
-                //then
-                StudentJson studentCsv = studentCsvRead;
-                assertAll(
-                        () -> assertThat(studentCsv).hasNoNullFieldsOrProperties(),
-                        () -> assertThat(studentCsv.getId()).isGreaterThan(0),
-                        () -> assertThat(studentCsv.getFirstName()).isNotEmpty(),
+                    //then
+                    StudentJson studentCsv = studentCsvRead;
+                    assertAll(
+                            () -> assertThat(studentCsv).hasNoNullFieldsOrProperties(),
+                            () -> assertThat(studentCsv.getId()).isGreaterThan(0),
+                            () -> assertThat(studentCsv.getFirstName()).isNotEmpty(),
 //                        () -> assertThat(studentCsv.getLastName()).isNotEmpty(),
-                        () -> assertThat(studentCsv.getEmail()).isNotEmpty()
-                );
-            }
-            itemReader.close();
-            return null;
-        });
+                            () -> assertThat(studentCsv.getEmail()).isNotEmpty()
+                    );
+                }
+                itemReader.close();
+                return null;
+            });
+        }
+
     }
+
+    @Nested
+    class ReadPartItemsTests {
+
+        JobParameters jobParameters = new JobParametersBuilder(defaultJobParameters())
+                .addString("maxItemCount", "5")
+                .toJobParameters();
+
+        @Test
+        void jsonReaderStepTest() {
+
+            //when
+            JobExecution jobExecution = jobLauncherTestUtils.launchStep("Just Reading Step", jobParameters);
+            var actualStepExecutions = jobExecution.getStepExecutions();
+            ExitStatus actualJobExitStatus = jobExecution.getExitStatus();
+
+            //then
+            assertThat(actualStepExecutions)
+                    .hasSize(1)
+                    .allSatisfy(execution -> assertThat(execution.getWriteCount()).isEqualTo(5));
+            assertThat(actualJobExitStatus.getExitCode()).isEqualTo("COMPLETED");
+
+        }
+
+        @Test
+        void jsonReaderStepScopeTest() throws Exception {
+            //given
+            StepExecution stepExecution = MetaDataInstanceFactory
+                    .createStepExecution(jobParameters);
+
+            //when
+            StepScopeTestUtils.doInStepScope(stepExecution, () -> {
+                StudentJson studentCsvRead;
+                itemReader.open(stepExecution.getExecutionContext());
+                while ((studentCsvRead = itemReader.read()) != null) {
+
+                    //then
+                    StudentJson studentCsv = studentCsvRead;
+                    assertAll(
+                            () -> assertThat(studentCsv).hasNoNullFieldsOrProperties(),
+                            () -> assertThat(studentCsv.getId()).isGreaterThan(0),
+                            () -> assertThat(studentCsv.getId()).isLessThanOrEqualTo(5),
+                            () -> assertThat(studentCsv.getFirstName()).isNotEmpty(),
+//                        () -> assertThat(studentCsv.getLastName()).isNotEmpty(),
+                            () -> assertThat(studentCsv.getEmail()).isNotEmpty()
+                    );
+                }
+                itemReader.close();
+                return null;
+            });
+        }
+
+    }
+
 }
