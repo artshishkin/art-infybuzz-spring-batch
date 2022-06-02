@@ -1,9 +1,14 @@
 package net.shyshkin.study.batch.gettingstarted.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import net.shyshkin.study.batch.gettingstarted.model.JobParamsRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -15,15 +20,24 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 
+@Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"section04", "section05"})
 class JobControllerTest {
 
     @Autowired
     TestRestTemplate restTemplate;
+
+    @Autowired
+    JobExplorer jobExplorer;
 
     @ParameterizedTest
     @ValueSource(strings = {"First Job", "Second Job"})
@@ -35,6 +49,7 @@ class JobControllerTest {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo("Job `" + jobName + "` Started...");
+        awaitJobComplete(jobName);
     }
 
     @ParameterizedTest
@@ -51,6 +66,7 @@ class JobControllerTest {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo("Job `" + jobName + "` Started...");
+        awaitJobComplete(jobName);
     }
 
     private List<JobParamsRequest> dummyJobParamsRequest() {
@@ -71,6 +87,24 @@ class JobControllerTest {
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(responseEntity.getBody()).isEqualTo("Job with name `" + jobName + "` absent");
+    }
+
+    private void awaitJobComplete(String jobName) {
+        await()
+                .pollInterval(100, TimeUnit.MILLISECONDS)
+                .timeout(5, TimeUnit.SECONDS)
+                .until(
+                        (Callable<JobExecution>) () -> {
+                            JobInstance lastJobInstance = jobExplorer.getLastJobInstance(jobName);
+                            JobExecution lastJobExecution = jobExplorer.getLastJobExecution(lastJobInstance);
+                            log.debug("Get Last Job Execution: {}", lastJobExecution);
+                            return lastJobExecution;
+                        },
+                        allOf(
+                                notNullValue(),
+                                hasProperty("exitStatus", equalTo(ExitStatus.COMPLETED))
+                        )
+                );
     }
 
 }
