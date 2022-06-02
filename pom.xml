@@ -17,6 +17,7 @@
 
     <modules>
         <module>getting-started</module>
+        <module>item-readers</module>
     </modules>
 
     <properties>
