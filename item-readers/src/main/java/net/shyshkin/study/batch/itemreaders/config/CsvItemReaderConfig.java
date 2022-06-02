@@ -52,7 +52,8 @@ public class CsvItemReaderConfig {
                 .linesToSkip(1)
                 .resource(resource)
                 .delimited()
-                .names("id", "firstName", "lastName", "email")
+                .delimiter("|")
+                .names("ID", "First Name", "Last Name", "Email")
                 .targetType(StudentCsv.class)
                 .build();
     }
