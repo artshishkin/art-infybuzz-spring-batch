@@ -22,6 +22,18 @@ Content-Type: application/json
 []
 
 ###
+#Start Second Job with delay - 2000ms
+POST http://localhost:8080/api/job/start/Second Job
+Content-Type: application/json
+
+[
+  {
+    "paramKey": "processorPause",
+    "paramValue": "2000"
+  }
+]
+
+###
 #Start Absent Job
 POST http://localhost:8080/api/job/start/Fake Job
 Content-Type: application/json
@@ -30,4 +42,4 @@ Content-Type: application/json
 
 ###
 #Stop the Job
-GET http://localhost:8080/api/job/stop/45
+GET http://localhost:8080/api/job/stop/56
