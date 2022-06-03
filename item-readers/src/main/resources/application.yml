@@ -47,3 +47,16 @@ app:
   external:
     students-api:
       url: http://localhost:8090/api/v1/
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: external-api-list
+app:
+  external:
+    students-api:
+      url: http://localhost:8090/api/v1/
+
+

@@ -20,7 +20,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Profile("external-api")
+@Profile({"external-api","external-api-list"})
 public class StudentService {
 
     private final HttpClient httpClient;
