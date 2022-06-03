@@ -50,6 +50,7 @@ public class WebServiceItemReaderConfig {
         var readerAdapter = new ItemReaderAdapter<StudentResponse>();
         readerAdapter.setTargetObject(studentServiceAdapter);
         readerAdapter.setTargetMethod("getStudent");
+        readerAdapter.setArguments(new Object[]{1L, "Art"});
 
         return readerAdapter;
     }

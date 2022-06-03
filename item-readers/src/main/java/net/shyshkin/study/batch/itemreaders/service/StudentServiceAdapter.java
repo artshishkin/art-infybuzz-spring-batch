@@ -20,7 +20,9 @@ public class StudentServiceAdapter {
 
     private Queue<StudentResponse> studentQueue;
 
-    public StudentResponse getStudent() throws IOException, InterruptedException {
+    public StudentResponse getStudent(long id, String name) throws IOException, InterruptedException {
+
+        log.debug("Student's fake id: {}, name: {}", id, name);
 
         if (studentQueue == null) {
             studentQueue = new LinkedList<>(studentService.restCallToGetStudents());
