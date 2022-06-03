@@ -1,0 +1,6 @@
+version: '3'
+services:
+  students-api:
+    image: artarkatesoft/art-infybuzz-students-api:native
+    ports:
+      - "8090:8080"
