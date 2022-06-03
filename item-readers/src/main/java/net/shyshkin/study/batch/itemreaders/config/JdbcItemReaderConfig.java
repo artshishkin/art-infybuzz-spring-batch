@@ -55,7 +55,7 @@ public class JdbcItemReaderConfig {
     ) {
 
         return new JdbcCursorItemReaderBuilder<StudentJdbc>()
-                .name("jdbcItemReader")
+                .name("webServiceItemReader")
                 .dataSource(datasource)
                 .sql("select * from students")
                 .beanRowMapper(StudentJdbc.class)
