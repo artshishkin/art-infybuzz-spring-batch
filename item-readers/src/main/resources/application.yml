@@ -17,3 +17,24 @@ spring:
       platform: mysql
       initialize-schema: embedded
 
+---
+spring:
+  config:
+    activate:
+      on-profile: multiple-datasource
+
+  datasource:
+    jdbc-url: jdbc:mysql://localhost:23306/batch_db
+    username: batch_user
+    password: batch_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  batch:
+    jdbc:
+      platform: mysql
+      initialize-schema: embedded
+  universitydatasource:
+    jdbc-url: jdbc:mysql://localhost:33306/university_db
+    username: university_user
+    password: university_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+

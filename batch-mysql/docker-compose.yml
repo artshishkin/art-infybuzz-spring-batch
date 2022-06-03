@@ -13,6 +13,18 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
 
+  university-db:
+    image: mysql
+    ports:
+      - '33306:3306'
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_USER: university_user
+      MYSQL_PASSWORD: university_password
+      MYSQL_DATABASE: university_db
+    volumes:
+      - university-data:/var/lib/mysql
+
   adminer:
     image: adminer
     restart: always
@@ -21,3 +33,4 @@ services:
 
 volumes:
   mysql-data:
+  university-data:
