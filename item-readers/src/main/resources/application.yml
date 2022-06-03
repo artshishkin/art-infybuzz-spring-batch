@@ -38,3 +38,12 @@ spring:
     password: university_password
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+---
+spring:
+  config:
+    activate:
+      on-profile: external-api
+app:
+  external:
+    students-api:
+      url: http://localhost:8090/api/v1/
