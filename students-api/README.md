@@ -6,3 +6,4 @@
 2. Build Native Docker Image (with GraalVM)
     - `mvn package -Dpackaging=docker-native -Pgraalvm`
     - `docker tag students-api artarkatesoft/art-infybuzz-students-api:native`
+    - `docker push artarkatesoft/art-infybuzz-students-api:native`

@@ -1,13 +1,17 @@
 package net.shyshkin.study.batch.controller;
 
+import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Post;
+import lombok.extern.slf4j.Slf4j;
 import net.shyshkin.study.batch.model.Student;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
+@Slf4j
 @Controller("/api/v1")
 public class StudentsController {
 
@@ -24,5 +28,11 @@ public class StudentsController {
     @Get("/students")
     public List<Student> students() {
         return students;
+    }
+
+    @Post("/students")
+    public Student createStudent(@Body Student student) {
+        log.info("Created {}", student);
+        return student;
     }
 }
