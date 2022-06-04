@@ -2,6 +2,7 @@ package net.shyshkin.study.batch.itemwriters.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.shyshkin.study.batch.itemwriters.model.Student;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StudentService {
@@ -52,7 +54,7 @@ public class StudentService {
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
+        log.debug("Response from External Web Service: {}", response.body());
         return objectMapper.readValue(response.body(), Student.class);
     }
 
