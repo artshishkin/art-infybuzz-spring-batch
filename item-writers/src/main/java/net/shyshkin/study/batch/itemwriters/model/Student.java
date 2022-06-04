@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Data
@@ -19,4 +20,13 @@ public class Student {
     private String lastName;
     private String email;
 
+    @XmlElement(name = "first_name")
+    public String getFirstName() {
+        return firstName;
+    }
+
+    @XmlElement(name = "last_name")
+    public String getLastName() {
+        return lastName;
+    }
 }
