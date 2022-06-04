@@ -1,6 +1,6 @@
 package net.shyshkin.study.batch.itemwriters;
 
-import net.shyshkin.study.batch.itemwriters.model.Student;
+import net.shyshkin.study.batch.itemwriters.model.StudentJson;
 import net.shyshkin.study.batch.itemwriters.service.StudentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +25,7 @@ class JsonWriterJobTest extends AbstractJobTest {
     private static final String TEST_OUTPUT = "../OutputFiles/students.json";
 
     @Autowired
-    JsonFileItemWriter<Student> itemWriter;
+    JsonFileItemWriter<StudentJson> itemWriter;
 
     @Autowired
     StudentService studentService;
@@ -86,14 +87,25 @@ class JsonWriterJobTest extends AbstractJobTest {
         assertCorrectPropertyNames();
     }
 
-    private List<Student> mockStudents() {
-        return studentService.mockStudents();
+    private List<StudentJson> mockStudents() {
+
+        return studentService.mockStudents()
+                .stream()
+                .map(student -> StudentJson.builder()
+                        .id(student.getId())
+                        .firstName(student.getFirstName())
+                        .lastName(student.getLastName())
+                        .email(student.getEmail())
+                        .fullName(student.getFirstName() + " " + student.getLastName())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     private void assertCorrectPropertyNames() throws IOException {
         assertThat(Files.readAllLines(new FileSystemResource(TEST_OUTPUT).getFile().toPath()))
                 .anySatisfy(row -> assertThat(row).contains("first_name"))
-                .anySatisfy(row -> assertThat(row).contains("last_name"));
+                .anySatisfy(row -> assertThat(row).contains("last_name"))
+                .anySatisfy(row -> assertThat(row).contains("full_name"));
     }
 
 }
