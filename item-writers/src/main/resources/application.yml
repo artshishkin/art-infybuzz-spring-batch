@@ -1,6 +1,10 @@
 logging:
   level:
     net.shyshkin: debug
+app:
+  external:
+    students-api:
+      url: http://localhost:8090/api/v1/
 ---
 spring:
   config:
