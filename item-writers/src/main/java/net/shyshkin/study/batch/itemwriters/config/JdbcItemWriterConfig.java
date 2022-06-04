@@ -54,7 +54,13 @@ public class JdbcItemWriterConfig {
         return new JdbcBatchItemWriterBuilder<Student>()
                 .dataSource(dataSource)
                 .beanMapped()
-                .sql("insert into students (id,first_name,last_name,email) values (:id,:firstName,:lastName,:email)")
+                .sql("insert into students (id,first_name,last_name,email) values (?,?,?,?)")
+                .itemPreparedStatementSetter((student, ps) -> {
+                    ps.setLong(1, student.getId());
+                    ps.setString(2, student.getFirstName());
+                    ps.setString(3, student.getLastName());
+                    ps.setString(4, student.getEmail());
+                })
                 .build();
     }
 }
