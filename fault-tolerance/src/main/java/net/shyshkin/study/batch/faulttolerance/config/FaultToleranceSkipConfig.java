@@ -2,6 +2,7 @@ package net.shyshkin.study.batch.faulttolerance.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.shyshkin.study.batch.faulttolerance.listener.StudentSkipListener;
 import net.shyshkin.study.batch.faulttolerance.model.Student;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -28,6 +29,7 @@ public class FaultToleranceSkipConfig {
 
     private final JobBuilderFactory jobs;
     private final StepBuilderFactory steps;
+    private final StudentSkipListener studentSkipListener;
 
     @Bean
     Job chunkJob() {
@@ -46,6 +48,7 @@ public class FaultToleranceSkipConfig {
                 .skip(Throwable.class)
 //                .skipLimit(Integer.MAX_VALUE)
                 .skipPolicy(new AlwaysSkipItemSkipPolicy())
+                .listener(studentSkipListener)
                 .build();
     }
 
