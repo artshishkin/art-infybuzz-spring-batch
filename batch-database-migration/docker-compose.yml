@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  batch-db:
+    image: mysql
+    ports:
+      - '23306:3306'
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_USER: batch_user
+      MYSQL_PASSWORD: batch_password
+      MYSQL_DATABASE: batch_db
+    volumes:
+      - batch-data:/var/lib/mysql
+
+  source-db:
+    image: postgres
+    environment:
+      POSTGRES_USER: source_user
+      POSTGRES_PASSWORD: source_password
+      POSTGRES_DB: university
+    ports:
+      - '25432:5432'
+    volumes:
+      - source-data:/var/lib/postgresql/data
+
+  destination-db:
+    image: mysql
+    ports:
+      - '33306:3306'
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_USER: destination_user
+      MYSQL_PASSWORD: destination_password
+      MYSQL_DATABASE: destination_db
+    volumes:
+      - destination-data:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - '8081:8080'
+
+volumes:
+  batch-data:
+  destination-data:
+  source-data:

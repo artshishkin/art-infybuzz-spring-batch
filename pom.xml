@@ -20,6 +20,7 @@
         <module>item-readers</module>
         <module>item-writers</module>
         <module>fault-tolerance</module>
+        <module>database-migration</module>
     </modules>
 
     <properties>
