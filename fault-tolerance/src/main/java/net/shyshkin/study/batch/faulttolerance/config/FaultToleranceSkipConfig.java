@@ -10,6 +10,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.step.skip.AlwaysSkipItemSkipPolicy;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
@@ -44,7 +45,8 @@ public class FaultToleranceSkipConfig {
                 .writer(list -> list.forEach(item -> log.debug("{}", item)))
                 .faultTolerant()
                 .skip(FlatFileParseException.class)
-                .skipLimit(5)
+//                .skipLimit(Integer.MAX_VALUE)
+                .skipPolicy(new AlwaysSkipItemSkipPolicy())
                 .build();
     }
 
