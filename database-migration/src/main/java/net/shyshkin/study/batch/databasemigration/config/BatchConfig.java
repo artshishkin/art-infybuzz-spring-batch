@@ -2,7 +2,7 @@ package net.shyshkin.study.batch.databasemigration.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.shyshkin.study.batch.databasemigration.model.Department;
+import net.shyshkin.study.batch.databasemigration.posgresql.entity.Department;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
