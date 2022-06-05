@@ -1,0 +1,25 @@
+logging:
+  level:
+    net.shyshkin: debug
+
+spring:
+  batch:
+    jdbc:
+      platform: mysql
+      initialize-schema: always
+  datasource:
+    jdbc-url: jdbc:mysql://localhost:23306/batch_db
+    username: batch_user
+    password: batch_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  university-datasource:
+    jdbc-url: jdbc:postgresql://localhost:25432/university
+    username: source_user
+    password: source_password
+    driver-class-name: org.postgresql.Driver
+  destination-datasource:
+    jdbc-url: jdbc:mysql://localhost:33306/destination_db
+    username: university_user
+    password: university_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
