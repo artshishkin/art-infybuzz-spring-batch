@@ -42,7 +42,7 @@ class WebServiceListReaderJobTest extends AbstractJobTest {
     }
 
     @Test
-    void webServiceReaderJobText() throws Exception {
+    void webServiceReaderJobTest() throws Exception {
 
         //when
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(defaultJobParameters());

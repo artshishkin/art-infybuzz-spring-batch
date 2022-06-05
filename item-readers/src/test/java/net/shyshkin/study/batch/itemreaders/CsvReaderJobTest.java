@@ -25,7 +25,7 @@ class CsvReaderJobTest extends AbstractJobTest {
     }
 
     @Test
-    void csvReaderJobText() throws Exception {
+    void csvReaderJobTest() throws Exception {
 
         //when
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(defaultJobParameters());

@@ -11,6 +11,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -22,8 +23,8 @@ import org.springframework.core.io.FileSystemResource;
 @EnableBatchProcessing
 @Configuration
 @RequiredArgsConstructor
-@Profile("fault-tolerance")
-public class FaultToleranceConfig {
+@Profile("fault-tolerance-skip")
+public class FaultToleranceSkipConfig {
 
     private final JobBuilderFactory jobs;
     private final StepBuilderFactory steps;
@@ -41,6 +42,9 @@ public class FaultToleranceConfig {
                 .<Student, Student>chunk(3)
                 .reader(csvItemReader(null))
                 .writer(list -> list.forEach(item -> log.debug("{}", item)))
+                .faultTolerant()
+                .skip(FlatFileParseException.class)
+                .skipLimit(5)
                 .build();
     }
 
