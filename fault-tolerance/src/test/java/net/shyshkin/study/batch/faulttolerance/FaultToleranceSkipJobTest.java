@@ -29,9 +29,9 @@ class FaultToleranceSkipJobTest extends AbstractJobTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        Files.delete(Path.of(SKIP_READER_OUTPUT_FILE));
-        Files.delete(Path.of(SKIP_PROCESSOR_OUTPUT_FILE));
-        Files.delete(Path.of(SKIP_WRITER_OUTPUT_FILE));
+        Files.deleteIfExists(Path.of(SKIP_READER_OUTPUT_FILE));
+        Files.deleteIfExists(Path.of(SKIP_PROCESSOR_OUTPUT_FILE));
+        Files.deleteIfExists(Path.of(SKIP_WRITER_OUTPUT_FILE));
     }
 
     private JobParameters defaultJobParameters() {
