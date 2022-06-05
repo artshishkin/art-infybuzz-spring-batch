@@ -12,7 +12,6 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.skip.AlwaysSkipItemSkipPolicy;
 import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -44,7 +43,7 @@ public class FaultToleranceSkipConfig {
                 .reader(csvItemReader(null))
                 .writer(list -> list.forEach(item -> log.debug("{}", item)))
                 .faultTolerant()
-                .skip(FlatFileParseException.class)
+                .skip(Throwable.class)
 //                .skipLimit(Integer.MAX_VALUE)
                 .skipPolicy(new AlwaysSkipItemSkipPolicy())
                 .build();
