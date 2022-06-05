@@ -19,6 +19,7 @@
         <module>getting-started</module>
         <module>item-readers</module>
         <module>item-writers</module>
+        <module>fault-tolerance</module>
     </modules>
 
     <properties>
