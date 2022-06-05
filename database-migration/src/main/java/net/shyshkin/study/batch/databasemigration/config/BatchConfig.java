@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.shyshkin.study.batch.databasemigration.mysql.entity.StudentMysql;
 import net.shyshkin.study.batch.databasemigration.posgresql.entity.Student;
+import net.shyshkin.study.batch.databasemigration.processor.MappingProcessor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -31,6 +32,7 @@ public class BatchConfig {
     private final StepBuilderFactory steps;
     private final EntityManagerFactory posgresqlEntityManagerFactory;
     private final EntityManagerFactory mysqlEntityManagerFactory;
+    private final MappingProcessor processor;
 
     @Bean
     Job chunkJob() {
@@ -42,8 +44,9 @@ public class BatchConfig {
 
     private Step chunkStep() {
         return steps.get("Just Reading Step")
-                .<Student, Student>chunk(3)
+                .<Student, StudentMysql>chunk(3)
                 .reader(jpaItemReader(-1, -1))
+                .processor(processor)
                 .writer(list -> list.forEach(item -> log.debug("{}", item)))
                 .build();
     }
@@ -66,7 +69,7 @@ public class BatchConfig {
     }
 
     @Bean
-    JpaItemWriter<StudentMysql> jpaItemWriter(){
+    JpaItemWriter<StudentMysql> jpaItemWriter() {
         return new JpaItemWriterBuilder<StudentMysql>()
                 .entityManagerFactory(mysqlEntityManagerFactory)
                 .build();
