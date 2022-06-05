@@ -1,6 +1,7 @@
 package net.shyshkin.study.batch.faulttolerance.listener;
 
 import lombok.extern.slf4j.Slf4j;
+import net.shyshkin.study.batch.faulttolerance.exception.SomeExceptionInProcessor;
 import net.shyshkin.study.batch.faulttolerance.model.Student;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.listener.SkipListenerSupport;
@@ -23,15 +24,21 @@ import java.time.LocalDateTime;
 public class StudentSkipListener extends SkipListenerSupport<Student, Student> {
 
     private final FileSystemResource skipInReaderResource;
+    private FileSystemResource skipInProcessorResource;
 
-    public StudentSkipListener(@Value("#{jobParameters['skipInReaderFile']}") FileSystemResource skipInReaderResource) {
+    public StudentSkipListener(
+            @Value("#{jobParameters['skipInReaderFile']}") FileSystemResource skipInReaderResource,
+            @Value("#{jobParameters['skipInProcessorFile']}") FileSystemResource skipInProcessorResource
+    ) {
         this.skipInReaderResource = skipInReaderResource;
+        this.skipInProcessorResource = skipInProcessorResource;
     }
 
     @PostConstruct
     void init() {
         try {
             Files.createDirectories(skipInReaderResource.getFile().toPath().getParent());
+            Files.createDirectories(skipInProcessorResource.getFile().toPath().getParent());
         } catch (IOException e) {
             log.debug("Error while creating directories: {}", e.getMessage());
         }
@@ -43,6 +50,21 @@ public class StudentSkipListener extends SkipListenerSupport<Student, Student> {
             FlatFileParseException ex = (FlatFileParseException) t;
             try (FileWriter fileWriter = new FileWriter(skipInReaderResource.getFile(), true)) {
                 fileWriter.write(ex.getInput());
+                fileWriter.write(" - " + LocalDateTime.now());
+                fileWriter.write("\r\n");
+                fileWriter.flush();
+            } catch (IOException e) {
+                log.debug("Error while writing to skip logs: {}", e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void onSkipInProcess(Student student, Throwable t) {
+        if (t instanceof SomeExceptionInProcessor) {
+            try (FileWriter fileWriter = new FileWriter(skipInProcessorResource.getFile(), true)) {
+                fileWriter.write(student.toString());
+                fileWriter.write(" - " + t.getMessage());
                 fileWriter.write(" - " + LocalDateTime.now());
                 fileWriter.write("\r\n");
                 fileWriter.flush();
