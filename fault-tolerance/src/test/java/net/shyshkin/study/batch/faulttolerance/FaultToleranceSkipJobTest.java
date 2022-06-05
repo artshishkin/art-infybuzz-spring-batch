@@ -15,12 +15,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @ActiveProfiles("fault-tolerance-skip")
 class FaultToleranceSkipJobTest extends AbstractJobTest {
 
     public static final String SKIP_READER_OUTPUT_FILE = "../OutputFiles/Chunk Job/Fault Tolerance Step/reader/student-skip.txt";
     public static final String SKIP_PROCESSOR_OUTPUT_FILE = "../OutputFiles/Chunk Job/Fault Tolerance Step/processor/student-skip.txt";
+    public static final String SKIP_WRITER_OUTPUT_FILE = "../OutputFiles/Chunk Job/Fault Tolerance Step/writer/student-skip.txt";
 
     @Autowired
     FlatFileItemReader<Student> itemReader;
@@ -29,6 +31,7 @@ class FaultToleranceSkipJobTest extends AbstractJobTest {
     void setUp() throws IOException {
         Files.delete(Path.of(SKIP_READER_OUTPUT_FILE));
         Files.delete(Path.of(SKIP_PROCESSOR_OUTPUT_FILE));
+        Files.delete(Path.of(SKIP_WRITER_OUTPUT_FILE));
     }
 
     private JobParameters defaultJobParameters() {
@@ -36,6 +39,7 @@ class FaultToleranceSkipJobTest extends AbstractJobTest {
         paramsBuilder.addString("inputFile", "../InputFiles/students-fault.csv");
         paramsBuilder.addString("skipInReaderFile", SKIP_READER_OUTPUT_FILE);
         paramsBuilder.addString("skipInProcessorFile", SKIP_PROCESSOR_OUTPUT_FILE);
+        paramsBuilder.addString("skipInWriterFile", SKIP_WRITER_OUTPUT_FILE);
         return paramsBuilder.toJobParameters();
     }
 
@@ -52,6 +56,7 @@ class FaultToleranceSkipJobTest extends AbstractJobTest {
         assertThat(actualJobExitStatus.getExitCode()).isEqualTo("COMPLETED");
         AssertFile.assertLineCount(2, new FileSystemResource(SKIP_READER_OUTPUT_FILE));
         AssertFile.assertLineCount(1, new FileSystemResource(SKIP_PROCESSOR_OUTPUT_FILE));
+        AssertFile.assertLineCount(1, new FileSystemResource(SKIP_WRITER_OUTPUT_FILE));
     }
 
     @Test
@@ -65,9 +70,16 @@ class FaultToleranceSkipJobTest extends AbstractJobTest {
         //then
         assertThat(actualStepExecutions)
                 .hasSize(1)
-                .allSatisfy(execution -> assertThat(execution.getWriteCount()).isEqualTo(7));
+                .allSatisfy(execution -> assertAll(
+                        () -> assertThat(execution.getWriteCount()).isEqualTo(6),
+                        () -> assertThat(execution.getReadCount()).isEqualTo(8),
+                        () -> assertThat(execution.getReadSkipCount()).isEqualTo(2),
+                        () -> assertThat(execution.getProcessSkipCount()).isEqualTo(1),
+                        () -> assertThat(execution.getWriteSkipCount()).isEqualTo(1)
+                ));
         assertThat(actualJobExitStatus.getExitCode()).isEqualTo("COMPLETED");
         AssertFile.assertLineCount(2, new FileSystemResource(SKIP_READER_OUTPUT_FILE));
         AssertFile.assertLineCount(1, new FileSystemResource(SKIP_PROCESSOR_OUTPUT_FILE));
+        AssertFile.assertLineCount(1, new FileSystemResource(SKIP_WRITER_OUTPUT_FILE));
     }
 }
