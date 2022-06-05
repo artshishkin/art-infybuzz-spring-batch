@@ -19,7 +19,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   destination-datasource:
     jdbc-url: jdbc:mysql://localhost:33306/destination_db
-    username: university_user
-    password: university_password
+    username: destination_user
+    password: destination_password
     driver-class-name: com.mysql.cj.jdbc.Driver
 
