@@ -30,7 +30,7 @@ public class StudentMysql {
     @JoinColumn(name = "dept_id", referencedColumnName = "id")
     private Department department;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "student_id", referencedColumnName = "id")
     private List<SubjectsLearning> subjectsLearningList;
 

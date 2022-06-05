@@ -19,6 +19,7 @@ import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.orm.jpa.JpaTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
 
@@ -33,6 +34,7 @@ public class BatchConfig {
     private final EntityManagerFactory posgresqlEntityManagerFactory;
     private final EntityManagerFactory mysqlEntityManagerFactory;
     private final MappingProcessor processor;
+    private final JpaTransactionManager jpaTransactionManager;
 
     @Bean
     Job chunkJob() {
@@ -47,7 +49,9 @@ public class BatchConfig {
                 .<Student, StudentMysql>chunk(3)
                 .reader(jpaItemReader(-1, -1))
                 .processor(processor)
-                .writer(list -> list.forEach(item -> log.debug("{}", item)))
+                .writer(jpaItemWriter())
+                .transactionManager(jpaTransactionManager)
+//                .writer(list -> list.forEach(item -> log.debug("{}", item)))
                 .build();
     }
 
